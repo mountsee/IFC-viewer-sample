@@ -1,44 +1,4 @@
-/* body{
-    background: linear-gradient(147deg, rgba(164, 222, 255, 0.6) 4%, rgba(255, 145, 123, 0.5) 96%);    
-    height: 100%;
-    margin: 0;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
 
-}
-
-.header{
-    text-align: center;
-}
-
-.header h1{
-    font-family: 'Open Sans', sans-serif;
-    font-size: 60px;
-    text-shadow: 3px 2px rgb(248, 119, 55);
-    color: #ffba00;
-}
-
-.canvas {
-    position:absolute;
-    left:25%;
-    top:25%;
-    transform: translate(-25%, -25%);
-    margin-top: 3%;
-}
-
-#file-input {
-    z-index: 1;
-    position: relative;
-    left:52%;
-    transform: translateX(-52%);
-    font-size: 15px;
-}
-#three-canvas{
-    position: relative;
-    height: 100% !important;
-    width: 100% !important;
-    z-index: 10;
-} */
 
 *{
     margin: 0;
@@ -74,8 +34,8 @@ body{
 .message-container {
     z-index: 1;
     position: absolute;
-    top: 30px;
-    margin: 16px;
+    top: 20px;
+    margin: 40px;
     background-color: rgba(255,255,255,0.8);
     display: inline-block;
     padding: 10px;
@@ -98,6 +58,7 @@ body{
     font-family: 'Open Sans', sans-serif;
     font-size: 20px;
     text-align: right;
+    padding: 30px;
 }
 
 .header pre{
@@ -107,4 +68,41 @@ body{
     text-shadow: 1px 1px rgb(141, 141, 141);
     color: #000000;
     padding: 30px;
+}
+
+/* #clickMe {
+    position: absolute;
+    left: 500px;
+    top: 150px;
+    z-index: 15;
+  } */
+
+
+#side-menu-left {
+    width: 40px;
+}
+
+.side-menu {
+    z-index: 1;
+    position: fixed;
+    background-color: #36393F;
+    height: 100vh;
+}
+
+.icon {
+    max-width: 25px;
+    max-height: 25px;
+    margin: auto;
+}
+
+.basic-button {
+    /* background-color: #202225; */
+    width: 100%;
+    height: 40px;
+    border: none;
+    text-align: center;
+}
+
+.basic-button:hover {
+    background-color: #838383;
 }

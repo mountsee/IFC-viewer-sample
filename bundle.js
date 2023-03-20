@@ -28375,6 +28375,127 @@ new Vector3$1();
 new Vector3$1();
 new Triangle$1();
 
+class SphereGeometry extends BufferGeometry$1 {
+
+	constructor( radius = 1, widthSegments = 32, heightSegments = 16, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI ) {
+
+		super();
+		this.type = 'SphereGeometry';
+
+		this.parameters = {
+			radius: radius,
+			widthSegments: widthSegments,
+			heightSegments: heightSegments,
+			phiStart: phiStart,
+			phiLength: phiLength,
+			thetaStart: thetaStart,
+			thetaLength: thetaLength
+		};
+
+		widthSegments = Math.max( 3, Math.floor( widthSegments ) );
+		heightSegments = Math.max( 2, Math.floor( heightSegments ) );
+
+		const thetaEnd = Math.min( thetaStart + thetaLength, Math.PI );
+
+		let index = 0;
+		const grid = [];
+
+		const vertex = new Vector3$1();
+		const normal = new Vector3$1();
+
+		// buffers
+
+		const indices = [];
+		const vertices = [];
+		const normals = [];
+		const uvs = [];
+
+		// generate vertices, normals and uvs
+
+		for ( let iy = 0; iy <= heightSegments; iy ++ ) {
+
+			const verticesRow = [];
+
+			const v = iy / heightSegments;
+
+			// special case for the poles
+
+			let uOffset = 0;
+
+			if ( iy == 0 && thetaStart == 0 ) {
+
+				uOffset = 0.5 / widthSegments;
+
+			} else if ( iy == heightSegments && thetaEnd == Math.PI ) {
+
+				uOffset = - 0.5 / widthSegments;
+
+			}
+
+			for ( let ix = 0; ix <= widthSegments; ix ++ ) {
+
+				const u = ix / widthSegments;
+
+				// vertex
+
+				vertex.x = - radius * Math.cos( phiStart + u * phiLength ) * Math.sin( thetaStart + v * thetaLength );
+				vertex.y = radius * Math.cos( thetaStart + v * thetaLength );
+				vertex.z = radius * Math.sin( phiStart + u * phiLength ) * Math.sin( thetaStart + v * thetaLength );
+
+				vertices.push( vertex.x, vertex.y, vertex.z );
+
+				// normal
+
+				normal.copy( vertex ).normalize();
+				normals.push( normal.x, normal.y, normal.z );
+
+				// uv
+
+				uvs.push( u + uOffset, 1 - v );
+
+				verticesRow.push( index ++ );
+
+			}
+
+			grid.push( verticesRow );
+
+		}
+
+		// indices
+
+		for ( let iy = 0; iy < heightSegments; iy ++ ) {
+
+			for ( let ix = 0; ix < widthSegments; ix ++ ) {
+
+				const a = grid[ iy ][ ix + 1 ];
+				const b = grid[ iy ][ ix ];
+				const c = grid[ iy + 1 ][ ix ];
+				const d = grid[ iy + 1 ][ ix + 1 ];
+
+				if ( iy !== 0 || thetaStart > 0 ) indices.push( a, b, d );
+				if ( iy !== heightSegments - 1 || thetaEnd < Math.PI ) indices.push( b, c, d );
+
+			}
+
+		}
+
+		// build geometry
+
+		this.setIndex( indices );
+		this.setAttribute( 'position', new Float32BufferAttribute$1( vertices, 3 ) );
+		this.setAttribute( 'normal', new Float32BufferAttribute$1( normals, 3 ) );
+		this.setAttribute( 'uv', new Float32BufferAttribute$1( uvs, 2 ) );
+
+	}
+
+	static fromJSON( data ) {
+
+		return new SphereGeometry( data.radius, data.widthSegments, data.heightSegments, data.phiStart, data.phiLength, data.thetaStart, data.thetaLength );
+
+	}
+
+}
+
 class ShadowMaterial$1 extends Material$1 {
 
 	constructor( parameters ) {
@@ -124036,7 +124157,7 @@ class IFCLoader extends Loader {
 
 }
 
-// import JSON;
+// import { IfcViewerAPI } from "web-ifc-viewer";
 
   // Creates subset material
 const preselectMat = new MeshLambertMaterial$1({
@@ -124083,6 +124204,7 @@ const preselectMat = new MeshLambertMaterial$1({
 
   renderer.setSize(size.width, size.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  document.body.appendChild(renderer.domElement);
 
   //Creates grids and axes in the scene
   const grid = new GridHelper$1(50, 30);
@@ -124181,6 +124303,7 @@ const output = document.getElementById("prop-output");
 async function pick(event) {
   const found = cast(event)[0];
   if (found) {
+      console.log(found);
       const index = found.faceIndex;
       const geometry = found.object.geometry;
       const ifc = ifcLoader.ifcManager;
@@ -124234,3 +124357,164 @@ function highlight(event, material, model) {
 }
 
 window.onmousemove = (event) => highlight(event, preselectMat, preselectModel);
+
+root = new Group$1();
+scene.add( root );
+
+
+window.onkeydown = (event) => {
+  if (event.code === "KeyP") {
+    scene.
+    IfcViewerAPI.clipper.createPlane();
+  }
+};
+
+window.onkeydown = (event) => {
+  if (event.code === "KeyO") {
+    IfcViewerAPI.clipper.deletePlane();
+  }
+};
+
+// const moonMassDiv = document.createElement( 'div' );
+// moonMassDiv.className = 'label';
+// moonMassDiv.textContent = '7.342e22 kg';
+// moonMassDiv.style.marginTop = '-1em';
+// const moonMassLabel = new CSS2DObject( moonMassDiv );
+// moonMassLabel.position.set( 0, - 2 * MOON_RADIUS, 0 );
+// moon.add( moonMassLabel );
+// moonMassLabel.layers.set( 1 );
+
+window.onload = function() {
+  document.getElementById("clickMe").addEventListener("click", btnlog);
+ };
+
+
+var btnval;
+function btnlog() {
+  if (clickMe.value === 'Start') {
+    btnval = 1;
+    clickMe.value = 'Stop';
+    
+  } else {
+    btnval = 0;
+    clickMe.value = 'Start';
+  }
+  console.log(btnval);
+  if (btnval === 1) {
+    document.addEventListener("mousedown", onDocumentMouseDown, false);
+    scene.add(line);
+    scene.add(markerA);
+    scene.add(markerB);
+  }else {
+    document.removeEventListener("mousedown", onDocumentMouseDown, false);
+    scene.remove(line);
+    scene.remove(markerA);
+    scene.remove(markerB);
+  }
+}
+
+var points = [
+  new Vector3$1(),
+  new Vector3$1()
+];
+var clicks = 0;
+
+var markerA = new Mesh$1(
+  new SphereGeometry(0.1, 10, 20),
+  new MeshBasicMaterial$1({
+    color: 0xff5555
+  })
+);
+var markerB = markerA.clone();
+var markers = [
+  markerA, markerB
+];
+scene.add(markerA);
+scene.add(markerB);
+
+var lineGeometry = new BufferGeometry$1().setFromPoints([new Vector3$1(), new Vector3$1()]);
+var lineMaterial = new LineBasicMaterial$1({
+  color: 'skyblue',
+  linewidth: 20,
+});
+
+var line = new Line$1(lineGeometry, lineMaterial);
+scene.add(line);
+
+function setLine(vectorA, vectorB) {
+  line.geometry.attributes.position.setXYZ(0, vectorA.x, vectorA.y, vectorA.z);
+  line.geometry.attributes.position.setXYZ(1, vectorB.x, vectorB.y, vectorB.z);
+  line.geometry.attributes.position.needsUpdate = true;
+}
+
+function onDocumentMouseDown(event) {
+  if (event.which === 1) {
+    var intersects = cast(event);
+
+    if (intersects.length > 0) {
+
+      points[clicks].copy(intersects[0].point);
+      markers[clicks].position.copy(intersects[0].point);
+      setLine(intersects[0].point, intersects[0].point);
+      clicks++;
+      if (clicks > 1){
+        var distance = points[0].distanceTo(points[1]);
+        distancePlace.innerText = distance;
+        setLine(points[0], points[1]);
+        clicks = 0;
+      }
+    }
+  }
+}
+// var marker = new THREE.Mesh(new THREE.SphereBufferGeometry(0.25, 4, 2), new THREE.MeshBasicMaterial({
+//   color: 0xFFc8FF
+// }));
+// marker.position.setScalar(1000);
+// scene.add(marker);
+
+// var intscs = [];
+// var rc = new Raycaster();
+// var m = new THREE.Vector2();
+// var poi = new THREE.Vector3();
+// var pos = new THREE.Vector3();
+// var tp = [
+//   new THREE.Vector3(),
+//   new THREE.Vector3(),
+//   new THREE.Vector3()
+// ];
+// var tri = new THREE.Triangle();
+// var bc = new THREE.Vector3();
+// var idx = 0;
+
+// renderer.domElement.addEventListener("pointermove", onMouseMove);
+
+// function onMouseMove(event) {
+//   m.x = (event.clientX / window.innerWidth) * 2 - 1;
+//   m.y = -(event.clientY / window.innerHeight) * 2 + 1;
+//   rc.setFromCamera(m, camera);
+//   intscs = rc.intersectObjects(ifcModels, false);
+//   if (intscs.length > 0) {
+//     let o = intscs[0];
+//     poi.copy(o.point);
+//     o.object.worldToLocal(poi);
+//     setPos(o.faceIndex);
+//     o.object.localToWorld(pos);
+//     marker.position.copy(pos);
+//   }
+// }
+
+// function setPos(faceIndex) {
+//   tp[0].fromBufferAttribute(intscs[0].object.geometry.attributes.position, faceIndex * 3 + 0);
+//   tp[1].fromBufferAttribute(intscs[0].object.geometry.attributes.position, faceIndex * 3 + 1);
+//   tp[2].fromBufferAttribute(intscs[0].object.geometry.attributes.position, faceIndex * 3 + 2);
+//   tri.set(tp[0], tp[1], tp[2]);
+//   tri.getBarycoord(poi, bc);
+//   if (bc.x > bc.y && bc.x > bc.z) {
+//     idx = 0;
+//   } else if (bc.y > bc.x && bc.y > bc.z) {
+//     idx = 1;
+//   } else if (bc.z > bc.x && bc.z > bc.y) {
+//     idx = 2;
+//   }
+//   pos.copy(tp[idx]);
+// }
